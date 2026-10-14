@@ -1,4 +1,9 @@
-# Latest benchmark results
+# Fabric, Databricks and Snowflake: Exploratory Analytics POC
+
+Results and documentation for a TPC-DS-inspired analytical workload at nominal
+SF3000, approximately 3 TB, including multi-billion-row fact tables in Azure
+West US 2. This is not an official TPC-DS benchmark or a definitive platform
+ranking.
 
 **Databricks query runtime:** Databricks Runtime 16.4, Scala 2.12
 (`16.4.x-scala2.12`), used for both Photon and Standard publication lanes.
@@ -12,7 +17,7 @@ not the Windows client. Results are fully consumed without output caps or
 automatic benchmark-query retries. Run IDs and
 infrastructure identities are omitted from this public summary.
 
-## Consolidated full-result measurements
+## Consolidated Full-Result Measurements
 
 Windows-client lanes are ordered by ascending geometric mean per query. The Spark
 notebook row is listed last because its execution/consumption boundary differs;
@@ -43,10 +48,9 @@ CU, credits and vCPU are not interchangeable measures. Snowflake physical cores
 and Fabric Spark executor allocation were not captured.
 
 Spark's available timing statistics cover 85 measured queries and 86 statement
-outputs, with zero
-warmups and one measurement, fully consumed on the notebook driver. No
-completed Spark-to-Windows timing exists; the ODBC full-result gate remains
-blocked. These notebook values are not Windows full-fetch or Spark noop results.
+outputs, with zero warmups and one measurement, fully consumed on the notebook
+driver. No completed Spark-to-Windows timing exists; the ODBC full-result gate
+remains blocked. These notebook values are not Windows full-fetch or Spark noop results.
 
 All six completed Windows lanes consumed 85 queries and 86 outputs. Fabric Warehouse
 and Lakehouse SQL each consumed 60,959,601 rows; Databricks Photon and non-Photon
@@ -66,13 +70,13 @@ connector. All result rows are fetched, counted and discarded. Client placement
 and consumption are aligned, not transports, hardware or guaranteed cache state.
 Photon and non-Photon refer to Databricks, not Snowflake.
 
-## Configuration and limits
+## Configuration and Limits
 
 - Fabric Warehouse: F64, native tables, result caching disabled.
 - Fabric Lakehouse SQL endpoint: F64, per-query result-cache bypass, SQL Server
 	ODBC full fetch. Completed October 13; capacity pause confirmed afterward.
 - Fabric Spark SQL: F64, Fabric notebook execution with full driver consumption.
-  Its available 85-query timing is separate from the blocked Windows ODBC path.
+	Its available 85-query timing is separate from the blocked Windows ODBC path.
 - Databricks Photon client: DBR 16.4, four Standard_D8ads_v5 workers plus a
 	matching driver, fresh all-purpose compute, Unity Catalog Delta tables.
 - Databricks non-Photon: DBR 16.4, seven Standard_D8ads_v5 workers plus a matching
@@ -82,17 +86,57 @@ Photon and non-Photon refer to Databricks, not Snowflake.
 	factor 8, session result caching disabled. Baseline and experimental optimized
 	layouts are reported separately.
 
-Single passes do not establish repeatability, confidence intervals or an
-equivalent-compute ranking. Cross-engine result-value equivalence and historical
-row-count differences remain unresolved. Earlier capped publication statistics
-are not included.
+Warehouse had the lowest observed batch time and geometric mean among the
+latest Windows-client lanes. A single pass does not establish a repeatable
+winner. Earlier repeated runs used different protocols and must not be treated
+as repetitions of this experiment. Full cross-platform result-value equivalence
+and actual billed workload cost remain unverified.
 
-## Scope
+F64's nominal hourly price was a configuration-selection reference, not an
+equal-cost or identical-hardware constraint. The configurations have different
+price models, acceleration, caching, transports and consumption boundaries.
+Startup, authentication, metadata checks and cleanup are outside the displayed
+timers. Baseline and experimental optimized Snowflake layouts are reported
+separately; this is not a uniformly untuned comparison.
 
-Raw run evidence, campaign plans and qualification receipts are kept outside the
-public export. This page contains reported summary numbers, not a public archive
-for independently reaggregating the private client runs. The private hosted
-and notebook lab uses a separate legacy 86-query protocol; running it unchanged
-does not reproduce the 85-query unlimited-output Windows experiment.
-That lab, its query files and its runner code are not distributed in this
-results/documentation-only repository.
+## Documentation
+
+- [Architecture and data access](https://github.com/kollasriram/tpcds-multiengine-benchmark/blob/main/docs/02-architecture.md)
+- [Recorded environment setup](https://github.com/kollasriram/tpcds-multiengine-benchmark/blob/main/docs/03-environment-setup.md)
+- [Dataset generation and recorded table counts](https://github.com/kollasriram/tpcds-multiengine-benchmark/blob/main/docs/04-dataset-generation.md)
+- [Methodology and historical protocols](https://github.com/kollasriram/tpcds-multiengine-benchmark/blob/main/docs/07-methodology.md)
+- [Observed troubleshooting](https://github.com/kollasriram/tpcds-multiengine-benchmark/blob/main/docs/09-troubleshooting.md)
+- [Legacy hosted runbook](https://github.com/kollasriram/tpcds-multiengine-benchmark/blob/main/docs/RUNBOOK.md)
+- [Latest results](https://github.com/kollasriram/tpcds-multiengine-benchmark/blob/main/docs/RESULTS.md)
+
+## Release Scope
+
+This is a results-and-documentation-only release. It does not include SQL query
+files, notebooks, harnesses, tests, raw run evidence, query manifests, logs,
+resource/run IDs, real deployment endpoints, credentials or the dataset.
+File paths and commands in the historical setup/runbook describe the private
+benchmark kit; that runnable kit is not distributed here. This repository
+cannot independently reproduce or reaggregate the private measurements.
+The private hosted/notebook lab uses a separate legacy one-warmup/two-measurement
+protocol; running it unchanged does not reproduce the latest zero-warmup results.
+
+## Licensing and Attribution
+
+The workload used TPC-DS-derived queries adapted for Microsoft Fabric,
+Azure Databricks and Snowflake. [Agirish/tpcds](https://github.com/Agirish/tpcds)
+is credited as the Spark SQL source reference; adaptations included
+dialect-specific syntax and numeric-semantics fixes. No upstream affiliation
+or endorsement is claimed. The source reference is attribution, not a grant
+of redistribution rights.
+
+When checked on October 14, 2026, GitHub reported no license for Agirish/tpcds,
+and its complete file tree contained no license, notice or README file. This
+does not determine all rights in the underlying TPC-DS material. The
+[TPC toolkit EULA](https://github.com/databricks/tpcds-kit/blob/master/EULA.txt)
+also has redistribution conditions. Query files and notebooks containing query
+text are deliberately excluded from this release. Modifications and attribution
+alone do not resolve redistribution permissions.
+
+No repository-wide open-source license is granted for this documentation.
+TPC-DS is a trademark of the Transaction Processing Performance Council. The
+benchmark data is synthetic.
