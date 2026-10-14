@@ -23,15 +23,15 @@ Windows-client lanes are ordered by ascending geometric mean per query. The Spar
 notebook row is listed last because its execution/consumption boundary differs;
 it must not be ranked as a Windows-client measurement.
 
-| Lane / runtime and client | Statement outputs | Batch execution time (min) | Total measured query time (min) | Geometric mean/query (s) | Cost / Power | Compute configuration | Status |
-|---|---:|---:|---:|---:|---|---|---|
-| Fabric Warehouse<br>Managed T-SQL; build not captured<br>SQL ODBC 18.06.0002 | 86 | **23.3462** | 23.3371 | 5.0223 | $11.52/h model<br>64 CU | F64 shared capacity<br>Warehouse native tables | Completed |
-| Fabric Lakehouse SQL endpoint<br>Managed T-SQL; build not captured<br>SQL ODBC 18.06.0002 | 86 | **30.9591** | 30.9419 | 6.8782 | $11.52/h model<br>64 CU | F64 shared capacity<br>Lakehouse SQL analytics endpoint | Completed |
-| Snowflake optimized<br>Managed SQL; build not captured<br>Python connector 4.7.5 | 86 | **23.9822** | 23.9743 | 7.1424 | $15/h base model + QAS<br>5 credits/h base | Medium STANDARD Gen2<br>1 cluster; QAS max 8<br>Experimental optimized layout | Completed |
-| Snowflake baseline<br>Managed SQL; build not captured<br>Python connector 4.7.5 | 86 | **29.3691** | 29.3611 | 11.3612 | $15/h base model + QAS<br>5 credits/h base | Medium STANDARD Gen2<br>1 cluster; QAS max 8<br>Baseline native layout | Completed |
-| Azure Databricks Photon<br>DBR 16.4; Scala 2.12<br>ODBC 2.12.1.1001 | 86 | **47.3428** | 47.3256 | 12.6435 | $13.06/h model<br>40 vCPU; 160 GiB RAM | Standard_D8ads_v5<br>4 workers + 1 driver<br>On-demand all-purpose; Photon<br>Classic VNet-injected compute | Completed |
-| Azure Databricks non-Photon<br>DBR 16.4; Scala 2.12<br>ODBC 2.12.1.1001 | 86 | **84.8936** | 84.8760 | 22.5370 | $12.096/h model<br>64 vCPU; 256 GiB RAM | Standard_D8ads_v5<br>7 workers + 1 driver<br>On-demand all-purpose; Standard<br>Classic VNet-injected compute | Completed |
-| Fabric Spark SQL (notebook driver)<br>Fabric Runtime 2.0<br>Spark 4.1.1; Python 3.13.11 | 86 | **35.2560** | 34.9754 | 15.6807 | $11.52/h model<br>64 CU; executor allocation not captured | F64 shared capacity<br>Fabric notebook; full driver consumption | Notebook completed; Windows ODBC blocked |
+| Lane / runtime and client | Statement outputs | Rows consumed on Windows (approx.) | Batch execution time (min) | Total measured query time (min) | Geometric mean/query (s) | Cost / Power | Compute configuration | Status |
+|---|---:|---:|---:|---:|---:|---|---|---|
+| Fabric Warehouse<br>Managed T-SQL; build not captured<br>SQL ODBC 18.06.0002 | 86 | ~61.0 million | **23.3462** | 23.3371 | 5.0223 | $11.52/h model<br>64 CU | F64 shared capacity<br>Warehouse native tables | Completed |
+| Fabric Lakehouse SQL endpoint<br>Managed T-SQL; build not captured<br>SQL ODBC 18.06.0002 | 86 | ~61.0 million | **30.9591** | 30.9419 | 6.8782 | $11.52/h model<br>64 CU | F64 shared capacity<br>Lakehouse SQL analytics endpoint | Completed |
+| Snowflake optimized<br>Managed SQL; build not captured<br>Python connector 4.7.5 | 86 | ~61.0 million | **23.9822** | 23.9743 | 7.1424 | $15/h base model + QAS<br>5 credits/h base | Medium STANDARD Gen2<br>1 cluster; QAS max 8<br>Experimental optimized layout | Completed |
+| Snowflake baseline<br>Managed SQL; build not captured<br>Python connector 4.7.5 | 86 | ~61.0 million | **29.3691** | 29.3611 | 11.3612 | $15/h base model + QAS<br>5 credits/h base | Medium STANDARD Gen2<br>1 cluster; QAS max 8<br>Baseline native layout | Completed |
+| Azure Databricks Photon<br>DBR 16.4; Scala 2.12<br>ODBC 2.12.1.1001 | 86 | ~61.0 million | **47.3428** | 47.3256 | 12.6435 | $13.06/h model<br>40 vCPU; 160 GiB RAM | Standard_D8ads_v5<br>4 workers + 1 driver<br>On-demand all-purpose; Photon<br>Classic VNet-injected compute | Completed |
+| Azure Databricks non-Photon<br>DBR 16.4; Scala 2.12<br>ODBC 2.12.1.1001 | 86 | ~61.0 million | **84.8936** | 84.8760 | 22.5370 | $12.096/h model<br>64 vCPU; 256 GiB RAM | Standard_D8ads_v5<br>7 workers + 1 driver<br>On-demand all-purpose; Standard<br>Classic VNet-injected compute | Completed |
+| Fabric Spark SQL (notebook driver)<br>Fabric Runtime 2.0<br>Spark 4.1.1; Python 3.13.11 | 86 | N/A (notebook driver) | **35.2560** | 34.9754 | 15.6807 | $11.52/h model<br>64 CU; executor allocation not captured | F64 shared capacity<br>Fabric notebook; full driver consumption | Notebook completed; Windows ODBC blocked |
 
 Runtime/client versions are recorded values, not assumed managed-engine builds.
 Spark's recorded build is `4.1.1.5.5.20260930.238388267`; Databricks' configured
@@ -52,11 +52,10 @@ outputs, with zero warmups and one measurement, fully consumed on the notebook
 driver. No completed Spark-to-Windows timing exists; the ODBC full-result gate
 remains blocked. These notebook values are not Windows full-fetch or Spark noop results.
 
-All six completed Windows lanes consumed 85 queries and 86 outputs. Fabric Warehouse
-and Lakehouse SQL each consumed 60,959,601 rows; Databricks Photon and non-Photon
-each consumed 61,035,697; both Snowflake layouts consumed 61,035,727. These
-cross-engine count differences remain unresolved and are not evidence of equal
-result values.
+All six completed Windows lanes consumed 85 queries and 86 outputs, totaling
+approximately 61.0 million rows per lane on the Windows client. These rounded
+totals conceal small cross-engine count differences, which remain unresolved
+and do not establish equal result values.
 
 **Batch execution time is the primary metric, displayed in minutes:** first SQL submission through
 final full consumption at the recorded client/driver location, including
