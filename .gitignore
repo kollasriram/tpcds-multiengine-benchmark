@@ -1,0 +1,14 @@
+# This repository is documentation only.
+results/
+reproduced-final/
+queries/
+notebooks/
+harnesses/
+tests/
+__pycache__/
+*.pyc
+.env
+.env.*
+*.secret
+*.pat
+*.log
